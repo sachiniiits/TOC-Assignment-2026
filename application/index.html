@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOC Simulator: Interactive DFA Engine</title>
+    <!-- Use structured fonts for better aesthetics -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;500;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- Phase 1: Library View -->
+        <div id="library-view" class="view-section active">
+            <header>
+                <h1>DFA Library</h1>
+                <p>Select from our exhaustive collection of procedurally generated Automata</p>
+            </header>
+
+            <div class="toolbar glass-panel">
+                <div class="search-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="search-input" placeholder="Search presets (e.g., 'Divisible by 4', 'Ends with 10')">
+                </div>
+                <div class="filters">
+                    <select id="category-filter" class="form-select">
+                        <option value="All">All Categories</option>
+                    </select>
+                    <select id="sort-select" class="form-select">
+                        <option value="default">Default Sort</option>
+                        <option value="statesAsc">State Count (Low to High)</option>
+                        <option value="statesDesc">State Count (High to Low)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="preset-stats" id="preset-stats">Showing 100+ templates</div>
+
+            <div class="preset-grid" id="preset-grid">
+                <!-- Preset Cards will be dynamically injected here -->
+            </div>
+        </div>
+
+        <!-- Phase 2: Simulator View -->
+        <div id="simulator-view" class="view-section hidden">
+            <header class="simulator-header">
+                <button id="btn-back" class="btn btn-secondary back-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                    Back to Library
+                </button>
+                <div class="header-titles">
+                    <h1 id="sim-title">TOC Simulator</h1>
+                    <p id="sim-desc">Automaton logic evaluation</p>
+                </div>
+                <div class="header-pad"></div> <!-- For flex centering -->
+            </header>
+
+            <main class="dashboard">
+                <!-- Left Panel: SVG Visualization -->
+                <section class="visualizer-panel glass-panel">
+                    <div class="svg-container" id="dfa-svg-container">
+                        <svg width="100%" height="100%" viewBox="0 0 800 600" id="dfa-svg" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="rgba(255,255,255,0.4)" />
+                                </marker>
+                                <marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#00e5ff" />
+                                </marker>
+                            </defs>
+                            
+                            <!-- Dynamically Generated via JS -->
+                            <g class="edges" id="svg-edges"></g>
+                            <g class="nodes" id="svg-nodes"></g>
+                        </svg>
+                    </div>
+                </section>
+
+                <!-- Right Panel: Controls -->
+                <aside class="controls-panel glass-panel">
+                    <h2>Simulation Controls</h2>
+                    
+                    <div class="input-group">
+                        <label for="binary-input">Enter Binary String</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="binary-input" placeholder="e.g., 10110" autocomplete="off" maxlength="20">
+                        </div>
+                        <div id="input-error" class="error-text"></div>
+                    </div>
+
+                    <div class="tape-wrapper">
+                        <h3>Input Tape</h3>
+                        <div class="tape-container" id="tape-container">
+                            <div class="tape-placeholder">Awaiting input...</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="btn-reset" class="btn btn-secondary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            Reset
+                        </button>
+                        <button id="btn-step" class="btn btn-primary" title="Step one character forward">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                            Step
+                        </button>
+                        <button id="btn-play" class="btn btn-accent" title="Auto run full string">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Play
+                        </button>
+                    </div>
+
+                    <div class="status-card" id="status-card">
+                        <div class="status-header">Current Status</div>
+                        <div class="status-content">
+                            <div class="status-row">
+                                <span>Active State:</span>
+                                <span class="status-value highlight" id="status-state">-</span>
+                            </div>
+                            <div class="status-row mt-2">
+                                <span>Final Result:</span>
+                                <span class="status-value badge" id="status-result">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+            </main>
+        </div>
+    </div>
+
+    <script src="dfaGenerators.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
